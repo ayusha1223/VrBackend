@@ -1,16 +1,48 @@
 const QuizQuestion = require("../models/quizQuestion.model");
 const QuizAttempt = require("../models/quizAttempt.model");
 const aiService = require("./ai.service");
+
+// ==========================
+// Create Quiz Question
+// ==========================
 const createQuestion = async (questionData) => {
   return await QuizQuestion.create(questionData);
 };
 
+// ==========================
+// Get All Active Questions
+// ==========================
 const getQuestions = async () => {
-  return await QuizQuestion.find({ isActive: true });
+  return await QuizQuestion.find({ isActive: true }).sort({ createdAt: 1 });
 };
 
+// ==========================
+// Update Quiz Question
+// ==========================
+const updateQuestion = async (id, questionData) => {
+  return await QuizQuestion.findByIdAndUpdate(
+    id,
+    questionData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+};
+
+// ==========================
+// Delete Quiz Question
+// ==========================
+const deleteQuestion = async (id) => {
+  return await QuizQuestion.findByIdAndDelete(id);
+};
+
+// ==========================
+// Submit Quiz
+// ==========================
 const submitQuiz = async (studentId, answers) => {
   let totalScore = 0;
+
   const processedAnswers = [];
   const courseScores = {};
 
@@ -40,6 +72,7 @@ const submitQuiz = async (studentId, answers) => {
     });
   }
 
+  // Temporary recommendation before AI
   let recommendedCourse = "";
   let highestScore = 0;
 
@@ -50,42 +83,54 @@ const submitQuiz = async (studentId, answers) => {
     }
   }
 
+  // AI Recommendation
   const aiResponse = await aiService.generateRecommendation({
-  totalScore,
-  courseScores,
-  answers: processedAnswers,
-});
+    totalScore,
+    courseScores,
+    answers: processedAnswers,
+  });
 
-let recommendation = {};
+  let recommendation;
 
-try {
-  recommendation = JSON.parse(aiResponse);
-} catch (error) {
-  recommendation = {
-    recommendedCourse,
-    confidence: 80,
-    reason: "AI response could not be parsed.",
-    topCourses: [],
+  try {
+    recommendation = JSON.parse(aiResponse);
+  } catch (error) {
+    recommendation = {
+      recommendedCourse,
+      confidence: 80,
+      reason: "AI response could not be parsed.",
+      topCourses: [],
+    };
+  }
+
+  // Save Quiz Attempt
+  const attempt = await QuizAttempt.create({
+    student: studentId,
+    answers: processedAnswers,
+    totalScore,
+    recommendedCourse: recommendation.recommendedCourse,
+    confidence: recommendation.confidence,
+    aiReason: recommendation.reason,
+  });
+
+  return {
+    attempt,
+    ai: recommendation,
   };
-}
-
-const attempt = await QuizAttempt.create({
-  student: studentId,
-  answers: processedAnswers,
-  totalScore,
-  recommendedCourse: recommendation.recommendedCourse,
-  confidence: recommendation.confidence,
-  aiReason: recommendation.reason,
-});
-
-return {
-  attempt,
-  ai: recommendation,
 };
+const getRecommendationHistory = async (studentId) => {
+  return await QuizAttempt.find({
+    student: studentId,
+  }).sort({
+    createdAt: -1,
+  });
 };
 
 module.exports = {
   createQuestion,
   getQuestions,
+  updateQuestion,
+  deleteQuestion,
   submitQuiz,
+  getRecommendationHistory,
 };
