@@ -5,15 +5,23 @@ const router = express.Router();
 const {
   createQuestion,
   getQuestions,
+  submitQuiz,
 } = require("../../controllers/quiz.controller");
 
 const protect = require("../../middleware/auth.middleware");
 const authorize = require("../../middleware/role.middleware");
 
-// Public - Students can view questions
+// Public
 router.get("/", getQuestions);
 
-// Admin - Create question
+// Student
+router.post(
+  "/submit",
+  protect,
+  submitQuiz
+);
+
+// Admin
 router.post(
   "/",
   protect,
