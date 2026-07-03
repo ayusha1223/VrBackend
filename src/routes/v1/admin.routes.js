@@ -2,25 +2,17 @@ const express = require("express");
 
 const router = express.Router();
 
-const {
-  createCourse,
-  getAllCourses,
-  getCourseById,
-} = require("../../controllers/course.controller");
+const { getDashboard } = require("../../controllers/admin.controller");
 
 const protect = require("../../middleware/auth.middleware");
 const authorize = require("../../middleware/role.middleware");
 
-// Public
-router.get("/", getAllCourses);
-router.get("/:id", getCourseById);
-
-// Admin Only
-router.post(
-  "/",
+// Admin Dashboard
+router.get(
+  "/dashboard",
   protect,
   authorize("admin"),
-  createCourse
+  getDashboard
 );
 
 module.exports = router;

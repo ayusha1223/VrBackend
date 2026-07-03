@@ -6,6 +6,7 @@ const authRoutes = require("./routes/v1/auth.routes");
 const userRoutes = require("./routes/v1/user.routes");
 const courseRoutes = require("./routes/v1/course.routes");
 const quizRoutes = require("./routes/v1/quiz.routes");
+const adminRoutes = require("./routes/v1/admin.routes");
 const app = express();
 
 app.use(cors());
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/quiz", quizRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

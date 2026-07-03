@@ -7,8 +7,12 @@ const createCourse = async (courseData) => {
 const getAllCourses = async () => {
   return await Course.find().sort({ createdAt: -1 });
 };
+const getCourseById = async (id) => {
+  return await Course.findById(id);
+};
 
 module.exports = {
   createCourse,
   getAllCourses,
+  getCourseById,
 };
