@@ -55,9 +55,59 @@ const getCourseById = async (req, res) => {
     });
   }
 };
+const updateCourse = async (req, res) => {
+  try {
+    const course = await courseService.updateCourse(
+      req.params.id,
+      req.body
+    );
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course updated successfully",
+      data: course,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const deleteCourse = async (req, res) => {
+  try {
+    const course = await courseService.deleteCourse(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Course deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   createCourse,
   getAllCourses,
   getCourseById,
+  updateCourse,
+  deleteCourse,
 };
