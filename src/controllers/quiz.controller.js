@@ -36,7 +36,7 @@ const getQuestions = async (req, res) => {
 
 const submitQuiz = async (req, res) => {
   try {
-    const attempt = await quizService.submitQuiz(
+    const result = await quizService.submitQuiz(
       req.user.id,
       req.body.answers
     );
@@ -44,7 +44,8 @@ const submitQuiz = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Quiz submitted successfully",
-      data: attempt,
+      recommendation: result.ai,
+      data: result.attempt,
     });
   } catch (error) {
     res.status(500).json({
